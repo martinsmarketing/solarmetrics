@@ -784,6 +784,8 @@ const utilities = [
   ['rocky-mountain-power-wy','Rocky Mountain Power WY','wyoming',0.108,'Full Retail','Full retail rate','No overall limit'],
   ['clarksburg-mon','Mon Power (Clarksburg)','west-virginia',0.118,'Full Retail','Full retail rate','No overall limit'],
   ['city-utilities','City Utilities','missouri',0.118,'Full Retail','Full retail rate','No overall limit'],
+  ['tacoma-public-utilities','Tacoma Public Utilities','washington',0.102,'Full Retail','Full retail rate','No overall limit'],
+  ['clark-public-utilities','Clark Public Utilities','washington',0.102,'Full Retail','Full retail rate','No overall limit'],
 ];
 
 const insertUtility = db.prepare(`INSERT OR REPLACE INTO utilities VALUES (?,?,?,?,?,?,?)`);

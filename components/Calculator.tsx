@@ -122,10 +122,23 @@ function calcResult(bill: number, stateSlug: string): CalcResult {
 
 const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
-export default function Calculator({ defaultState = 'texas', defaultBill = 150 }: { defaultState?: string; defaultBill?: number }) {
+export default function Calculator({
+  defaultState = 'texas',
+  defaultBill = 150,
+  onStateChange,
+  onBillChange,
+}: {
+  defaultState?: string;
+  defaultBill?: number;
+  onStateChange?: (slug: string) => void;
+  onBillChange?: (bill: number) => void;
+}) {
   const [bill, setBill] = useState(defaultBill);
   const [stateSlug, setStateSlug] = useState(defaultState);
   const [result, setResult] = useState<CalcResult | null>(null);
+
+  const handleBillChange = (v: number) => { setBill(v); onBillChange?.(v); };
+  const handleStateChange = (s: string) => { setStateSlug(s); onStateChange?.(s); };
 
   const recalc = useCallback(() => {
     if (bill > 0) setResult(calcResult(bill, stateSlug));
@@ -150,7 +163,7 @@ export default function Calculator({ defaultState = 'texas', defaultBill = 150 }
               min={20}
               max={2000}
               value={bill}
-              onChange={e => setBill(Number(e.target.value))}
+              onChange={e => handleBillChange(Number(e.target.value))}
               className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none text-lg font-semibold"
             />
           </div>
@@ -160,7 +173,7 @@ export default function Calculator({ defaultState = 'texas', defaultBill = 150 }
           <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
           <select
             value={stateSlug}
-            onChange={e => setStateSlug(e.target.value)}
+            onChange={e => handleStateChange(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none"
           >
             {Object.entries(STATE_SLUGS).map(([name, slug]) => (

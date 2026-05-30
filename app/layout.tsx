@@ -26,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex items-center gap-6 text-sm font-medium text-gray-600">
               <Link href="/solar-calculator" className="hover:text-yellow-500 transition-colors">Calculator</Link>
               <Link href="/#states" className="hover:text-yellow-500 transition-colors">States</Link>
+              <Link href="/#faq" className="hover:text-yellow-500 transition-colors">About</Link>
               <a
                 href="https://www.energysage.com/?utm_source=solarmetrics&utm_medium=nav&utm_campaign=quotes"
                 target="_blank"

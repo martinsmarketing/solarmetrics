@@ -45,7 +45,18 @@ export default async function IncentivesPage({ params }: { params: Promise<{ sta
   const utilities = db.prepare('SELECT * FROM utilities WHERE state_slug = ?').all(state) as UtilityRow[];
   const sample = calculateSolarSavings({ monthly_bill: 150, state_slug: state });
 
+  const faqSchema = {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: [
+      { '@type': 'Question', name: `What solar incentives are available in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} offers: ${s.state_incentive_description}. All homeowners also qualify for the 30% federal Investment Tax Credit (ITC), which has no dollar cap and is available through 2032.` } },
+      { '@type': 'Question', name: `How much is the federal solar tax credit in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The federal ITC lets you deduct 30% of your total solar installation cost from your federal taxes. For a typical ${s.name} system costing $${sample.gross_system_cost.toLocaleString()}, that's a $${sample.federal_incentive.toLocaleString()} credit.` } },
+      { '@type': 'Question', name: `What is net metering in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} has ${s.net_metering_policy} net metering. This means solar owners are credited for excess power exported to the grid. The top utility is ${s.top_utility}.` } },
+    ],
+  };
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
     <div className="max-w-5xl mx-auto px-4 py-12">
       <div className="mb-2 text-sm text-gray-500">
         <Link href="/" className="hover:underline">Home</Link> › <Link href={`/solar-cost/${state}`} className="hover:underline">{s.name}</Link> › Incentives
@@ -146,5 +157,6 @@ export default async function IncentivesPage({ params }: { params: Promise<{ sta
         </div>
       </div>
     </div>
+    </>
   );
 }
