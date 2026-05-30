@@ -19,17 +19,18 @@ interface City {
 
 export async function generateStaticParams() {
   const db = getDb();
-  const states = db.prepare('SELECT slug FROM states').all() as { slug: string }[];
-  return states.map(s => ({ state: s.slug }));
+  const result = await db.execute('SELECT slug FROM states');
+  return (result.rows as unknown as { slug: string }[]).map(s => ({ state: s.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ state: string }> }): Promise<Metadata> {
   const { state } = await params;
   const db = getDb();
-  const s = db.prepare('SELECT name FROM states WHERE slug = ?').get(state) as { name: string } | undefined;
+  const result = await db.execute({ sql: 'SELECT name FROM states WHERE slug = ?', args: [state] });
+  const s = result.rows[0] as unknown as { name: string } | undefined;
   if (!s) return {};
   return generatePageMeta({
-    title: `Solar Panel Cost in ${s.name} – 2024 Prices & Savings`,
+    title: `Solar Panel Cost in ${s.name} – 2026 Prices & Savings`,
     description: `How much does solar cost in ${s.name}? See average prices, payback periods, state incentives, and savings estimates for every city.`,
     path: `/solar-cost/${state}`,
   });
@@ -40,11 +41,13 @@ const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', curren
 export default async function StatePage({ params }: { params: Promise<{ state: string }> }) {
   const { state } = await params;
   const db = getDb();
-  const s = db.prepare('SELECT * FROM states WHERE slug = ?').get(state) as State | undefined;
+  const stateRes = await db.execute({ sql: 'SELECT * FROM states WHERE slug = ?', args: [state] });
+  const s = stateRes.rows[0] as unknown as State | undefined;
   if (!s) notFound();
 
-  const cities = db.prepare('SELECT * FROM cities WHERE state_slug = ? ORDER BY population DESC').all(state) as City[];
-  const sample = calculateSolarSavings({ monthly_bill: 150, state_slug: state });
+  const citiesRes = await db.execute({ sql: 'SELECT * FROM cities WHERE state_slug = ? ORDER BY population DESC', args: [state] });
+  const cities = citiesRes.rows as unknown as City[];
+  const sample = await calculateSolarSavings({ monthly_bill: 150, state_slug: state });
 
   const faq = {
     '@context': 'https://schema.org', '@type': 'FAQPage',

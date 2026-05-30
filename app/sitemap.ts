@@ -3,11 +3,16 @@ import getDb from '@/lib/db';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const db = getDb();
-  const states = db.prepare('SELECT slug FROM states').all() as { slug: string }[];
-  const cities = db.prepare('SELECT slug, state_slug FROM cities').all() as { slug: string; state_slug: string }[];
-  const utilities = db.prepare('SELECT slug FROM utilities').all() as { slug: string }[];
+  const [statesRes, citiesRes, utilitiesRes] = await Promise.all([
+    db.execute('SELECT slug FROM states'),
+    db.execute('SELECT slug, state_slug FROM cities'),
+    db.execute('SELECT slug FROM utilities'),
+  ]);
+  const states = statesRes.rows as unknown as { slug: string }[];
+  const cities = citiesRes.rows as unknown as { slug: string; state_slug: string }[];
+  const utilities = utilitiesRes.rows as unknown as { slug: string }[];
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },

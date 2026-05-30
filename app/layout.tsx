@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'SolarMetrics – Solar Cost & Savings Calculator',
   description: 'Find out how much solar costs in your state, calculate your savings, and compare quotes from licensed installers.',
+  verification: {
+    google: 'RP8J1d34BJ-kWBh9tR3N6DDpGaxJr0POWJtxtMSu22I',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

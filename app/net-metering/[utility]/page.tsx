@@ -13,14 +13,15 @@ interface UtilityRow {
 
 export async function generateStaticParams() {
   const db = getDb();
-  const utils = db.prepare('SELECT slug FROM utilities').all() as { slug: string }[];
-  return utils.map(u => ({ utility: u.slug }));
+  const result = await db.execute('SELECT slug FROM utilities');
+  return (result.rows as unknown as { slug: string }[]).map(u => ({ utility: u.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ utility: string }> }): Promise<Metadata> {
   const { utility } = await params;
   const db = getDb();
-  const u = db.prepare('SELECT name FROM utilities WHERE slug = ?').get(utility) as { name: string } | undefined;
+  const result = await db.execute({ sql: 'SELECT name FROM utilities WHERE slug = ?', args: [utility] });
+  const u = result.rows[0] as unknown as { name: string } | undefined;
   if (!u) return {};
   return generatePageMeta({
     title: `${u.name} Net Metering Policy – Solar Rates & Rules`,
@@ -34,11 +35,13 @@ const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', curren
 export default async function NetMeteringPage({ params }: { params: Promise<{ utility: string }> }) {
   const { utility } = await params;
   const db = getDb();
-  const u = db.prepare('SELECT * FROM utilities WHERE slug = ?').get(utility) as UtilityRow | undefined;
+  const uRes = await db.execute({ sql: 'SELECT * FROM utilities WHERE slug = ?', args: [utility] });
+  const u = uRes.rows[0] as unknown as UtilityRow | undefined;
   if (!u) notFound();
 
-  const stateName = (db.prepare('SELECT name FROM states WHERE slug = ?').get(u.state_slug) as { name: string } | undefined)?.name ?? u.state_slug;
-  const sample = calculateSolarSavings({ monthly_bill: 150, state_slug: u.state_slug });
+  const stateRes = await db.execute({ sql: 'SELECT name FROM states WHERE slug = ?', args: [u.state_slug] });
+  const stateName = (stateRes.rows[0] as unknown as { name: string } | undefined)?.name ?? u.state_slug;
+  const sample = await calculateSolarSavings({ monthly_bill: 150, state_slug: u.state_slug });
 
   const policyImpact = {
     'Full Retail': { color: 'green', label: 'Excellent', desc: 'You are credited at the full retail rate for every kWh you export. This maximizes your solar ROI.' },

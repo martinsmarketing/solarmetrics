@@ -1,41 +1,21 @@
 import getDb from './db';
 
-export function calculateSolarSavings(input: {
-  monthly_bill: number;
-  state_slug: string;
-  system_size_kw?: number;
-}): {
-  system_size_kw: number;
-  gross_system_cost: number;
-  federal_incentive: number;
-  state_incentive: number;
-  net_cost: number;
-  annual_production_kwh: number;
-  annual_savings: number;
-  monthly_savings: number;
-  payback_period_years: number;
-  year_25_savings: number;
-  co2_offset_lbs: number;
-  homes_equivalent: number;
-} {
-  const db = getDb();
-  const state = db.prepare('SELECT * FROM states WHERE slug = ?').get(input.state_slug) as {
-    avg_electricity_rate: number;
-    avg_sun_hours: number;
-    avg_cost_per_watt: number;
-    state_incentive_value: number;
-  } | undefined;
+interface StateRow {
+  avg_electricity_rate: number;
+  avg_sun_hours: number;
+  avg_cost_per_watt: number;
+  state_incentive_value: number;
+}
 
-  const rate = state?.avg_electricity_rate ?? 0.135;
-  const sunHours = state?.avg_sun_hours ?? 5.0;
-  const costPerWatt = state?.avg_cost_per_watt ?? 3.00;
-  const stateIncentive = state?.state_incentive_value ?? 0;
-
-  let systemKw = input.system_size_kw;
-  if (!systemKw) {
-    const monthlyKwh = input.monthly_bill / rate;
-    systemKw = monthlyKwh / (sunHours * 30);
-  }
+function compute(
+  bill: number,
+  rate: number,
+  sunHours: number,
+  costPerWatt: number,
+  stateIncentive: number,
+  systemKwOverride?: number
+) {
+  let systemKw = systemKwOverride ?? (bill / rate) / (sunHours * 30);
   systemKw = Math.min(20, Math.max(3, systemKw));
 
   const annualProduction = systemKw * sunHours * 365 * 0.80;
@@ -44,19 +24,17 @@ export function calculateSolarSavings(input: {
   const netCost = grossCost - federalIncentive - stateIncentive;
   const annualSavings = annualProduction * rate;
   const monthlySavings = annualSavings / 12;
-  const payback = netCost / annualSavings;
+  const paybackRaw = (netCost <= 0 || annualSavings <= 0) ? null : netCost / annualSavings;
+  const payback = paybackRaw === null ? null : Math.min(30, Math.abs(paybackRaw));
 
-  // 25-year cumulative savings with 2.5% annual rate escalation
-  let year25 = 0;
+  let year25 = -netCost;
   let yearlyRate = rate;
   for (let y = 1; y <= 25; y++) {
     year25 += annualProduction * yearlyRate;
     yearlyRate *= 1.025;
   }
-  year25 -= netCost; // net of system cost
 
   const co2 = annualProduction * 0.92;
-  const homes = co2 / 14920;
 
   return {
     system_size_kw: Math.round(systemKw * 10) / 10,
@@ -67,46 +45,59 @@ export function calculateSolarSavings(input: {
     annual_production_kwh: Math.round(annualProduction),
     annual_savings: Math.round(annualSavings),
     monthly_savings: Math.round(monthlySavings),
-    payback_period_years: Math.round(payback * 10) / 10,
+    payback_period_years: payback === null ? null : Math.round(payback * 10) / 10,
     year_25_savings: Math.round(year25),
     co2_offset_lbs: Math.round(co2),
-    homes_equivalent: Math.round(homes * 10) / 10,
+    homes_equivalent: Math.round((co2 / 14920) * 10) / 10,
   };
 }
 
-export function getSavingsTimeline(input: {
+export async function calculateSolarSavings(input: {
   monthly_bill: number;
   state_slug: string;
-}): { year: number; cumulative_savings: number }[] {
+  system_size_kw?: number;
+}) {
   const db = getDb();
-  const state = db.prepare('SELECT * FROM states WHERE slug = ?').get(input.state_slug) as {
-    avg_electricity_rate: number;
-    avg_sun_hours: number;
-    avg_cost_per_watt: number;
-    state_incentive_value: number;
-  } | undefined;
+  const result = await db.execute({
+    sql: 'SELECT avg_electricity_rate, avg_sun_hours, avg_cost_per_watt, state_incentive_value FROM states WHERE slug = ?',
+    args: [input.state_slug],
+  });
 
-  const rate = state?.avg_electricity_rate ?? 0.135;
-  const sunHours = state?.avg_sun_hours ?? 5.0;
-  const costPerWatt = state?.avg_cost_per_watt ?? 3.00;
-  const stateIncentive = state?.state_incentive_value ?? 0;
+  const row = result.rows[0] as unknown as StateRow | undefined;
+  const rate = Number(row?.avg_electricity_rate ?? 0.135);
+  const sunHours = Number(row?.avg_sun_hours ?? 5.0);
+  const costPerWatt = Number(row?.avg_cost_per_watt ?? 3.00);
+  const stateIncentive = Number(row?.state_incentive_value ?? 0);
 
-  const monthlyKwh = input.monthly_bill / rate;
-  let systemKw = monthlyKwh / (sunHours * 30);
-  systemKw = Math.min(20, Math.max(3, systemKw));
+  return compute(input.monthly_bill, rate, sunHours, costPerWatt, stateIncentive, input.system_size_kw);
+}
 
-  const annualProduction = systemKw * sunHours * 365 * 0.80;
-  const grossCost = systemKw * costPerWatt * 1000;
-  const federalIncentive = grossCost * 0.30;
-  const netCost = grossCost - federalIncentive - stateIncentive;
+export async function getSavingsTimeline(input: {
+  monthly_bill: number;
+  state_slug: string;
+}) {
+  const db = getDb();
+  const result = await db.execute({
+    sql: 'SELECT avg_electricity_rate, avg_sun_hours, avg_cost_per_watt, state_incentive_value FROM states WHERE slug = ?',
+    args: [input.state_slug],
+  });
 
-  const timeline: { year: number; cumulative_savings: number }[] = [];
+  const row = result.rows[0] as unknown as StateRow | undefined;
+  const rate = Number(row?.avg_electricity_rate ?? 0.135);
+  const sunHours = Number(row?.avg_sun_hours ?? 5.0);
+  const costPerWatt = Number(row?.avg_cost_per_watt ?? 3.00);
+  const stateIncentive = Number(row?.state_incentive_value ?? 0);
+
+  const kw = Math.min(20, Math.max(3, (input.monthly_bill / rate) / (sunHours * 30)));
+  const annualProd = kw * sunHours * 365 * 0.80;
+  const gross = kw * costPerWatt * 1000;
+  const netCost = gross - gross * 0.30 - stateIncentive;
+
   let cumulative = -netCost;
-  let yearlyRate = rate;
-  for (let y = 1; y <= 25; y++) {
-    cumulative += annualProduction * yearlyRate;
-    yearlyRate *= 1.025;
-    timeline.push({ year: y, cumulative_savings: Math.round(cumulative) });
-  }
-  return timeline;
+  let r = rate;
+  return Array.from({ length: 25 }, (_, i) => {
+    cumulative += annualProd * r;
+    r *= 1.025;
+    return { year: i + 1, cumulative_savings: Math.round(cumulative) };
+  });
 }

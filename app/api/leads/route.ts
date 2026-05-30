@@ -20,8 +20,10 @@ export async function POST(req: NextRequest) {
     }
     const { name, email, phone, monthly_bill, city, state } = parsed.data;
     const db = getDb();
-    db.prepare(`INSERT INTO leads (name, email, phone, monthly_bill, city, state) VALUES (?,?,?,?,?,?)`)
-      .run(name, email, phone, monthly_bill, city, state);
+    await db.execute({
+      sql: `INSERT INTO leads (name, email, phone, monthly_bill, city, state) VALUES (?,?,?,?,?,?)`,
+      args: [name, email, phone, monthly_bill, city, state],
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('Lead insert error:', err);

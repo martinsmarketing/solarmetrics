@@ -18,17 +18,18 @@ interface UtilityRow {
 
 export async function generateStaticParams() {
   const db = getDb();
-  const states = db.prepare('SELECT slug FROM states').all() as { slug: string }[];
-  return states.map(s => ({ state: s.slug }));
+  const result = await db.execute('SELECT slug FROM states');
+  return (result.rows as unknown as { slug: string }[]).map(s => ({ state: s.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ state: string }> }): Promise<Metadata> {
   const { state } = await params;
   const db = getDb();
-  const s = db.prepare('SELECT name FROM states WHERE slug = ?').get(state) as { name: string } | undefined;
+  const result = await db.execute({ sql: 'SELECT name FROM states WHERE slug = ?', args: [state] });
+  const s = result.rows[0] as unknown as { name: string } | undefined;
   if (!s) return {};
   return generatePageMeta({
-    title: `${s.name} Solar Incentives & Tax Credits 2024`,
+    title: `${s.name} Solar Incentives & Tax Credits 2026`,
     description: `Complete guide to solar incentives in ${s.name}: state tax credits, rebates, net metering policies, and the federal 30% ITC.`,
     path: `/solar-incentives/${state}`,
   });
@@ -39,11 +40,14 @@ const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', curren
 export default async function IncentivesPage({ params }: { params: Promise<{ state: string }> }) {
   const { state } = await params;
   const db = getDb();
-  const s = db.prepare('SELECT * FROM states WHERE slug = ?').get(state) as StateRow | undefined;
+  const [stateRes, utilitiesRes] = await Promise.all([
+    db.execute({ sql: 'SELECT * FROM states WHERE slug = ?', args: [state] }),
+    db.execute({ sql: 'SELECT * FROM utilities WHERE state_slug = ?', args: [state] }),
+  ]);
+  const s = stateRes.rows[0] as unknown as StateRow | undefined;
   if (!s) notFound();
-
-  const utilities = db.prepare('SELECT * FROM utilities WHERE state_slug = ?').all(state) as UtilityRow[];
-  const sample = calculateSolarSavings({ monthly_bill: 150, state_slug: state });
+  const utilities = utilitiesRes.rows as unknown as UtilityRow[];
+  const sample = await calculateSolarSavings({ monthly_bill: 150, state_slug: state });
 
   const faqSchema = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -62,7 +66,7 @@ export default async function IncentivesPage({ params }: { params: Promise<{ sta
         <Link href="/" className="hover:underline">Home</Link> › <Link href={`/solar-cost/${state}`} className="hover:underline">{s.name}</Link> › Incentives
       </div>
       <h1 className="text-4xl font-extrabold text-gray-900 mt-2">{s.name} Solar Incentives & Tax Credits</h1>
-      <p className="mt-3 text-lg text-gray-600">Every solar incentive available to {s.name} homeowners in 2024.</p>
+      <p className="mt-3 text-lg text-gray-600">Every solar incentive available to {s.name} homeowners in 2026.</p>
 
       <div className="mt-10 space-y-6">
         {/* Federal ITC */}

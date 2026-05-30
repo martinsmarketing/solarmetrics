@@ -22,18 +22,22 @@ interface UtilityRow {
 
 export async function generateStaticParams() {
   const db = getDb();
-  const cities = db.prepare('SELECT slug, state_slug FROM cities').all() as { slug: string; state_slug: string }[];
-  return cities.map(c => ({ state: c.state_slug, city: c.slug }));
+  const result = await db.execute('SELECT slug, state_slug FROM cities');
+  return (result.rows as unknown as { slug: string; state_slug: string }[]).map(c => ({ state: c.state_slug, city: c.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ state: string; city: string }> }): Promise<Metadata> {
   const { state, city } = await params;
   const db = getDb();
-  const c = db.prepare('SELECT name FROM cities WHERE slug = ?').get(city) as { name: string } | undefined;
-  const s = db.prepare('SELECT name FROM states WHERE slug = ?').get(state) as { name: string } | undefined;
+  const [cr, sr] = await Promise.all([
+    db.execute({ sql: 'SELECT name FROM cities WHERE slug = ?', args: [city] }),
+    db.execute({ sql: 'SELECT name FROM states WHERE slug = ?', args: [state] }),
+  ]);
+  const c = cr.rows[0] as unknown as { name: string } | undefined;
+  const s = sr.rows[0] as unknown as { name: string } | undefined;
   if (!c || !s) return {};
   return generatePageMeta({
-    title: `Solar Panel Cost in ${c.name}, ${s.name} – 2024 Prices`,
+    title: `Solar Panel Cost in ${c.name}, ${s.name} – 2026 Prices`,
     description: `How much does solar cost in ${c.name}, ${s.name}? Get local pricing, payback estimates, utility net metering info, and free quotes.`,
     path: `/solar-cost/${state}/${city}`,
   });
@@ -44,17 +48,24 @@ const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', curren
 export default async function CityPage({ params }: { params: Promise<{ state: string; city: string }> }) {
   const { state, city } = await params;
   const db = getDb();
-  const cityRow = db.prepare('SELECT * FROM cities WHERE slug = ?').get(city) as CityRow | undefined;
-  const stateRow = db.prepare('SELECT * FROM states WHERE slug = ?').get(state) as StateRow | undefined;
+  const [cityRes, stateRes] = await Promise.all([
+    db.execute({ sql: 'SELECT * FROM cities WHERE slug = ?', args: [city] }),
+    db.execute({ sql: 'SELECT * FROM states WHERE slug = ?', args: [state] }),
+  ]);
+  const cityRow = cityRes.rows[0] as unknown as CityRow | undefined;
+  const stateRow = stateRes.rows[0] as unknown as StateRow | undefined;
   if (!cityRow || !stateRow) notFound();
 
-  // Find utility for this city
-  const utility = db.prepare("SELECT * FROM utilities WHERE name = ? OR name LIKE ?").get(
-    cityRow.utility_name, `%${cityRow.utility_name.split(' ')[0]}%`
-  ) as UtilityRow | undefined;
+  const utilityRes = await db.execute({
+    sql: 'SELECT * FROM utilities WHERE name = ? OR name LIKE ? LIMIT 1',
+    args: [cityRow.utility_name, `%${cityRow.utility_name.split(' ')[0]}%`],
+  });
+  const utility = utilityRes.rows[0] as unknown as UtilityRow | undefined;
 
-  const savings = calculateSolarSavings({ monthly_bill: 150, state_slug: state });
-  const timeline = getSavingsTimeline({ monthly_bill: 150, state_slug: state });
+  const [savings, timeline] = await Promise.all([
+    calculateSolarSavings({ monthly_bill: 150, state_slug: state }),
+    getSavingsTimeline({ monthly_bill: 150, state_slug: state }),
+  ]);
 
   const localBusinessSchema = {
     '@context': 'https://schema.org', '@type': 'LocalBusiness',

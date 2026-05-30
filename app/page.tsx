@@ -12,7 +12,7 @@ const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: [
-    { '@type': 'Question', name: 'How much does solar cost in 2024?', acceptedAnswer: { '@type': 'Answer', text: 'The average solar installation costs between $15,000 and $30,000 before incentives. After the 30% federal tax credit, most homeowners pay $10,000–$21,000. Costs vary by state, system size, and installer.' } },
+    { '@type': 'Question', name: 'How much does solar cost in 2026?', acceptedAnswer: { '@type': 'Answer', text: 'The average solar installation costs between $15,000 and $30,000 before incentives. After the 30% federal tax credit, most homeowners pay $10,000–$21,000. Costs vary by state, system size, and installer.' } },
     { '@type': 'Question', name: 'What is the federal solar tax credit?', acceptedAnswer: { '@type': 'Answer', text: 'The Residential Clean Energy Credit lets you deduct 30% of your solar installation cost from your federal taxes. On a $20,000 system, that\'s a $6,000 tax credit. It applies through 2032.' } },
     { '@type': 'Question', name: 'How long does it take for solar to pay for itself?', acceptedAnswer: { '@type': 'Answer', text: 'The average solar payback period in the US is 7–12 years. Sunny states with high electricity rates like Hawaii, Massachusetts, and California often see payback in 5–8 years.' } },
     { '@type': 'Question', name: 'What is net metering and why does it matter?', acceptedAnswer: { '@type': 'Answer', text: 'Net metering lets you sell excess solar power back to the grid, receiving credits on your bill. Full retail net metering gives you the most value. Some states offer avoided-cost rates instead, which are lower.' } },
@@ -20,9 +20,10 @@ const faqSchema = {
   ],
 };
 
-export default function HomePage() {
+export default async function HomePage() {
   const db = getDb();
-  const states = db.prepare('SELECT * FROM states ORDER BY name').all() as {
+  const result = await db.execute('SELECT * FROM states ORDER BY name');
+  const states = result.rows as unknown as {
     slug: string; name: string; avg_sun_hours: number; avg_electricity_rate: number;
     avg_cost_per_watt: number; state_incentive_value: number; net_metering_policy: string;
   }[];
