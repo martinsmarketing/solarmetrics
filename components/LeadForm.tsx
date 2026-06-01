@@ -16,7 +16,17 @@ export default function LeadForm({ city = '', state = '' }: { city?: string; sta
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, monthly_bill: Number(form.monthly_bill) }),
       });
-      setStatus(res.ok ? 'success' : 'error');
+      if (res.ok) {
+        const data = await res.json();
+        // Redirect to EnergySage with state-specific UTM — this is where the commission happens
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          setStatus('success');
+        }
+      } else {
+        setStatus('error');
+      }
     } catch {
       setStatus('error');
     }
