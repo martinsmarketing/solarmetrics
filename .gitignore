@@ -35,3 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 data/
+
+# next-sitemap generates these at build time with the correct production URL
+/public/sitemap*.xml
+/public/robots.txt
