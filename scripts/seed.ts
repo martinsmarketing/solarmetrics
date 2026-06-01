@@ -675,10 +675,34 @@ const cities: [string,string,string,number,number,number,number,number,string][]
   ['jackson-wy','Jackson','wyoming',43.4799,-110.7624,5.0,0.108,10532,'Lower Valley Energy'],
 ];
 
+// Deterministic per-city variation so every city page shows unique figures
+function cityHash(slug: string): number {
+  let h = 5381;
+  for (let i = 0; i < slug.length; i++) {
+    h = (((h << 5) + h) ^ slug.charCodeAt(i)) >>> 0;
+  }
+  return (h % 10000) / 10000; // 0..0.9999
+}
+function variedRate(base: number, slug: string): number {
+  // ±15% variation from state average, deterministic per city slug
+  const factor = 0.85 + cityHash(slug) * 0.30;
+  return Math.round(base * factor * 1000) / 1000;
+}
+function variedSun(base: number, lat: number, slug: string): number {
+  // Southern cities (lower lat) get slightly more sun; add small per-city noise
+  const latAdj = Math.max(-0.2, Math.min(0.2, (37 - lat) * 0.015));
+  const hashAdj = cityHash(slug + 'sun') * 0.3 - 0.15;
+  const adj = Math.max(-0.3, Math.min(0.3, latAdj + hashAdj));
+  return Math.round((base + adj) * 10) / 10;
+}
+
 const insertCity = db.prepare(`INSERT OR REPLACE INTO cities VALUES (?,?,?,?,?,?,?,?,?)`);
 const insertCities = db.transaction(() => {
-  for (const c of cities) {
-    insertCity.run(...c);
+  for (const [slug, name, state, lat, lng, sunBase, rateBase, pop, util] of cities) {
+    insertCity.run(slug, name, state, lat, lng,
+      variedSun(sunBase, lat, slug),
+      variedRate(rateBase, slug),
+      pop, util);
   }
 });
 insertCities();

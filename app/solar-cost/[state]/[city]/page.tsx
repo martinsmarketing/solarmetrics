@@ -63,8 +63,18 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
   const utility = utilityRes.rows[0] as unknown as UtilityRow | undefined;
 
   const [savings, timeline] = await Promise.all([
-    calculateSolarSavings({ monthly_bill: 150, state_slug: state }),
-    getSavingsTimeline({ monthly_bill: 150, state_slug: state }),
+    calculateSolarSavings({
+      monthly_bill: 150,
+      state_slug: state,
+      rate_override: cityRow.avg_electricity_rate,
+      sun_hours_override: cityRow.avg_sun_hours,
+    }),
+    getSavingsTimeline({
+      monthly_bill: 150,
+      state_slug: state,
+      rate_override: cityRow.avg_electricity_rate,
+      sun_hours_override: cityRow.avg_sun_hours,
+    }),
   ]);
 
   const localBusinessSchema = {

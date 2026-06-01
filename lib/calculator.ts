@@ -56,6 +56,8 @@ export async function calculateSolarSavings(input: {
   monthly_bill: number;
   state_slug: string;
   system_size_kw?: number;
+  rate_override?: number;
+  sun_hours_override?: number;
 }) {
   const db = getDb();
   const result = await db.execute({
@@ -64,8 +66,8 @@ export async function calculateSolarSavings(input: {
   });
 
   const row = result.rows[0] as unknown as StateRow | undefined;
-  const rate = Number(row?.avg_electricity_rate ?? 0.135);
-  const sunHours = Number(row?.avg_sun_hours ?? 5.0);
+  const rate = input.rate_override ?? Number(row?.avg_electricity_rate ?? 0.135);
+  const sunHours = input.sun_hours_override ?? Number(row?.avg_sun_hours ?? 5.0);
   const costPerWatt = Number(row?.avg_cost_per_watt ?? 3.00);
   const stateIncentive = Number(row?.state_incentive_value ?? 0);
 
@@ -75,6 +77,8 @@ export async function calculateSolarSavings(input: {
 export async function getSavingsTimeline(input: {
   monthly_bill: number;
   state_slug: string;
+  rate_override?: number;
+  sun_hours_override?: number;
 }) {
   const db = getDb();
   const result = await db.execute({
@@ -83,8 +87,8 @@ export async function getSavingsTimeline(input: {
   });
 
   const row = result.rows[0] as unknown as StateRow | undefined;
-  const rate = Number(row?.avg_electricity_rate ?? 0.135);
-  const sunHours = Number(row?.avg_sun_hours ?? 5.0);
+  const rate = input.rate_override ?? Number(row?.avg_electricity_rate ?? 0.135);
+  const sunHours = input.sun_hours_override ?? Number(row?.avg_sun_hours ?? 5.0);
   const costPerWatt = Number(row?.avg_cost_per_watt ?? 3.00);
   const stateIncentive = Number(row?.state_incentive_value ?? 0);
 
