@@ -11,14 +11,15 @@ export const metadata: Metadata = {
   verification: {
     google: 'RP8J1d34BJ-kWBh9tR3N6DDpGaxJr0POWJtxtMSu22I',
   },
-  other: {
-    'impact-site-verification': 'de99534b-7766-4bd7-ad01-4ae2b603ea3c',
-  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Impact.com affiliate verification — requires value= not content= */}
+        <meta name="impact-site-verification" value="de99534b-7766-4bd7-ad01-4ae2b603ea3c" />
+      </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
         <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
