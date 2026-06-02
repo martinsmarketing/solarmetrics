@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   verification: {
     google: 'RP8J1d34BJ-kWBh9tR3N6DDpGaxJr0POWJtxtMSu22I',
   },
+  other: {
+    'impact-site-verification': 'de99534b-7766-4bd7-ad01-4ae2b603ea3c',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
