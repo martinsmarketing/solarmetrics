@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Impact.com affiliate verification — requires value= not content= */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <meta name="impact-site-verification" {...{ value: 'de99534b-7766-4bd7-ad01-4ae2b603ea3c' } as any} />
+        <meta name="impact-site-verification" {...{ value: 'a481314a-4bcf-4e05-80f9-60758a902403' } as any} />
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
         <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
