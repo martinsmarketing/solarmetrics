@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Impact.com affiliate verification — requires value= not content= */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <meta name="impact-site-verification" content="a481314a-4bcf-4e05-80f9-60758a902403" {...{ value: 'a481314a-4bcf-4e05-80f9-60758a902403' } as any} />
+        <meta name="fo-verify" content="d4b6c940-494b-4894-8d77-046f3fd36bd0" />
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
         <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
