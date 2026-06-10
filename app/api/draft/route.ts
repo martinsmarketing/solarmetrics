@@ -22,6 +22,10 @@ const PROMPTS: Record<string, (topic: string) => string> = {
 };
 
 export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: 'Missing API key' }, { status: 500 });
+  }
+
   try {
     const body = await req.json();
     const { type, topic } = body as { type: string; topic: string };
