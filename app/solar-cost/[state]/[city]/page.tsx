@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import getDb from '@/lib/db';
 import { generatePageMeta } from '@/lib/metadata';
 import { calculateSolarSavings, getSavingsTimeline } from '@/lib/calculator';
+import { distanceMiles } from '@/lib/geo';
 import LeadForm from '@/components/LeadForm';
 import SavingsChart from '@/components/SavingsChart';
 import type { Metadata } from 'next';
@@ -62,6 +63,16 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
   });
   const utility = utilityRes.rows[0] as unknown as UtilityRow | undefined;
 
+  // Nearby cities in the same state — drives internal linking for SEO.
+  const siblingsRes = await db.execute({
+    sql: 'SELECT slug, name, lat, lng, population FROM cities WHERE state_slug = ? AND slug != ?',
+    args: [state, city],
+  });
+  const nearbyCities = (siblingsRes.rows as unknown as { slug: string; name: string; lat: number; lng: number; population: number }[])
+    .map(c => ({ ...c, distance: distanceMiles(cityRow.lat, cityRow.lng, c.lat, c.lng) }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 6);
+
   const [savings, timeline] = await Promise.all([
     calculateSolarSavings({
       monthly_bill: 150,
@@ -84,11 +95,14 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
     geo: { '@type': 'GeoCoordinates', latitude: cityRow.lat, longitude: cityRow.lng },
     description: `Solar panel installation services in ${cityRow.name}, ${stateRow.name}. Average savings of ${fmt(savings.annual_savings)}/year.`,
   };
+  const panelCount = Math.ceil((savings.system_size_kw * 1000) / 400);
   const faqSchema = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: [
       { '@type': 'Question', name: `How much does solar cost in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `Solar in ${cityRow.name}, ${stateRow.name} costs approximately ${fmt(savings.gross_system_cost)} for a ${savings.system_size_kw} kW system. After the 30% federal tax credit, your net cost is about ${fmt(savings.net_cost)}.` } },
       { '@type': 'Question', name: `What is the solar payback period in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The estimated payback period for solar in ${cityRow.name} is ${savings.payback_period_years} years, based on a $150/month electric bill and local sun hours of ${cityRow.avg_sun_hours} hrs/day.` } },
+      { '@type': 'Question', name: `Is solar worth it in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `For most ${cityRow.name} homeowners, yes. With ${cityRow.avg_sun_hours} peak sun hours per day and an electricity rate of $${cityRow.avg_electricity_rate.toFixed(3)}/kWh, a typical system saves ${fmt(savings.annual_savings)} per year and around ${fmt(savings.year_25_savings)} over 25 years after paying for itself in ${savings.payback_period_years} years.` } },
+      { '@type': 'Question', name: `How many solar panels do I need in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `A typical ${cityRow.name} home needs about ${panelCount} solar panels (a ${savings.system_size_kw} kW system) to offset a $150/month electric bill, producing roughly ${savings.annual_production_kwh.toLocaleString()} kWh per year at ${cityRow.avg_sun_hours} sun hours/day.` } },
       { '@type': 'Question', name: `Does ${cityRow.utility_name} offer net metering?`, acceptedAnswer: { '@type': 'Answer', text: `${cityRow.utility_name} offers ${utility?.net_metering_policy ?? stateRow.net_metering_policy} net metering. ${utility?.net_metering_compensation ?? 'Check with your utility for current compensation rates.'}.` } },
     ],
   };
@@ -124,6 +138,26 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
 
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-10">
+          {/* Unique local overview — written from this city's own data */}
+          <div className="prose prose-sm max-w-none text-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Solar in {cityRow.name}: What Homeowners Should Know</h2>
+            <p>
+              {cityRow.name} sees an average of <strong>{cityRow.avg_sun_hours} peak sun hours per day</strong>, which is what
+              ultimately determines how much electricity a rooftop system produces here. Paired with {stateRow.name}&apos;s
+              local electricity rate of <strong>${cityRow.avg_electricity_rate.toFixed(3)}/kWh</strong>, a typical home
+              offsetting a $150/month bill would install a <strong>{savings.system_size_kw} kW system</strong> (about{' '}
+              {panelCount} panels) generating roughly {savings.annual_production_kwh.toLocaleString()} kWh each year.
+            </p>
+            <p>
+              At those numbers, a {cityRow.name} homeowner saves about <strong>{fmt(savings.monthly_savings)}/month</strong>{' '}
+              ({fmt(savings.annual_savings)}/year). After the 30% federal tax credit brings the {fmt(savings.gross_system_cost)}{' '}
+              sticker price down to a net <strong>{fmt(savings.net_cost)}</strong>, the system pays for itself in{' '}
+              <strong>{savings.payback_period_years} years</strong> and goes on to produce free power for two decades beyond
+              that — an estimated {fmt(savings.year_25_savings)} in lifetime savings. The local grid is served by{' '}
+              {cityRow.utility_name}, whose net metering policy directly affects how much credit you earn for surplus power.
+            </p>
+          </div>
+
           {/* Savings breakdown */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Cost & Savings Breakdown</h2>
@@ -178,6 +212,17 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
             <a href={`/solar-incentives/${state}`} className="mt-4 inline-block text-blue-600 text-sm hover:underline">View all {stateRow.name} incentives →</a>
           </div>
 
+          {/* Installer tips */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Choosing a Solar Installer in {cityRow.name}</h2>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex gap-3"><span className="text-yellow-500 font-bold">1.</span><span><strong>Get at least 3 quotes.</strong> Prices in {stateRow.name} vary widely between installers — comparing bids on the same {savings.system_size_kw} kW system is the fastest way to avoid overpaying.</span></li>
+              <li className="flex gap-3"><span className="text-yellow-500 font-bold">2.</span><span><strong>Confirm {cityRow.utility_name} interconnection experience.</strong> An installer who regularly files with your local utility will move your permit and net-metering paperwork through faster.</span></li>
+              <li className="flex gap-3"><span className="text-yellow-500 font-bold">3.</span><span><strong>Check licensing &amp; the warranty.</strong> Look for NABCEP-certified installers and a workmanship warranty of 10+ years on top of the standard 25-year panel warranty.</span></li>
+              <li className="flex gap-3"><span className="text-yellow-500 font-bold">4.</span><span><strong>Size for your actual usage.</strong> With {cityRow.avg_sun_hours} sun hours/day in {cityRow.name}, make sure the proposed system matches your kWh history — not just your roof space.</span></li>
+            </ul>
+          </div>
+
           {/* FAQ */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4">Common Questions</h2>
@@ -190,6 +235,28 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
               ))}
             </div>
           </div>
+
+          {/* Nearby cities — internal linking */}
+          {nearbyCities.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Compare Solar Costs Near {cityRow.name}</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {nearbyCities.map(nc => (
+                  <a
+                    key={nc.slug}
+                    href={`/solar-cost/${state}/${nc.slug}`}
+                    className="block border border-gray-200 rounded-lg p-3 hover:border-yellow-400 hover:bg-yellow-50 transition-colors"
+                  >
+                    <div className="font-semibold text-gray-900 text-sm">{nc.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{Math.round(nc.distance)} mi away</div>
+                  </a>
+                ))}
+              </div>
+              <a href={`/solar-cost/${state}`} className="mt-4 inline-block text-blue-600 text-sm hover:underline">
+                View all {stateRow.name} cities →
+              </a>
+            </div>
+          )}
         </div>
 
         <div>

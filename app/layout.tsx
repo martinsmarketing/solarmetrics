@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import Script from 'next/script';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
   title: 'SolarMetrics – Solar Cost & Savings Calculator',
@@ -89,6 +91,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `(function(i,m,p,a,c,t){c.ire_o=p;c[p]=c[p]||function(){(c[p].a=c[p].a||[]).push(arguments)};t=a.createElement(m);var z=a.getElementsByTagName(m)[0];t.async=1;t.src=i;z.parentNode.insertBefore(t,z)})('https://utt.impactcdn.com/P-A7370269-565c-47ad-8677-67719f3fd2b31.js','script','impactStat',document,window);impactStat('transformLinks');impactStat('trackImpression');`,
           }}
         />
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );
