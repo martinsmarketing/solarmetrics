@@ -99,7 +99,7 @@ const states = [
   { slug:'oregon', name:'Oregon', cpw:3.10, desc:'Oregon offers a rebate of up to $5,000 through the Oregon Solar + Storage Rebate Program.', val:5000, nm:'Full Retail', sun:4.2, rate:0.115, util:'Pacific Power' },
   { slug:'pennsylvania', name:'Pennsylvania', cpw:3.10, desc:'Pennsylvania offers a Solar Renewable Energy Credit (SREC) program.', val:1000, nm:'Full Retail', sun:4.4, rate:0.148, util:'PECO' },
   { slug:'rhode-island', name:'Rhode Island', cpw:3.50, desc:'Rhode Island offers a 25% state tax credit up to $7,500.', val:7500, nm:'Full Retail', sun:4.2, rate:0.228, util:'National Grid RI' },
-  { slug:'south-carolina', name:'South Carolina', cpw:2.85, desc:'South Carolina offers a 25% state tax credit up to $35,000 over 5 years.', val:35000, nm:'Full Retail', sun:5.0, rate:0.138, util:'Duke Energy SC' },
+  { slug:'south-carolina', name:'South Carolina', cpw:2.85, desc:'South Carolina offers a 25% state tax credit, capped at $3,500 per year (up to $35,000 total over time).', val:3500, nm:'Full Retail', sun:5.0, rate:0.138, util:'Duke Energy SC' },
   { slug:'south-dakota', name:'South Dakota', cpw:2.90, desc:'South Dakota has no state income tax, making federal credits more valuable.', val:0, nm:'Full Retail', sun:5.0, rate:0.112, util:'Otter Tail Power' },
   { slug:'tennessee', name:'Tennessee', cpw:2.85, desc:'Tennessee has no statewide solar incentive program.', val:0, nm:'Avoided Cost', sun:4.8, rate:0.118, util:'TVA' },
   { slug:'texas', name:'Texas', cpw:2.75, desc:'Texas offers a property tax exemption for the added home value from solar.', val:1000, nm:'Avoided Cost', sun:5.5, rate:0.120, util:'Oncor' },
