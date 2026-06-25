@@ -26,6 +26,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="fo-verify" content="d4b6c940-494b-4894-8d77-046f3fd36bd0" />
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
+        {/* Site-wide notice: the 30% federal purchase credit expired Dec 31, 2025 */}
+        <div className="bg-gray-900 text-gray-100 text-sm">
+          <div className="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
+            <span>⚠️ The <strong>30% federal tax credit ended Dec 31, 2025</strong> for purchased systems. Solar leases &amp; PPAs can still pass through the savings —</span>
+            <a
+              href="https://www.energysage.com/?utm_source=solarmetrics&utm_medium=banner&utm_campaign=lease"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-yellow-400 hover:text-yellow-300 underline underline-offset-2"
+            >
+              compare lease &amp; PPA quotes →
+            </a>
+          </div>
+        </div>
         <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 font-bold text-xl text-yellow-500">

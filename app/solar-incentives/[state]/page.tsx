@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ state: st
   if (!s) return {};
   return generatePageMeta({
     title: `${s.name} Solar Incentives & Tax Credits 2026`,
-    description: `Complete guide to solar incentives in ${s.name}: state tax credits, rebates, net metering policies, and the federal 30% ITC.`,
+    description: `Complete guide to solar incentives in ${s.name}: state tax credits, rebates, net metering policies, and what changed when the federal 30% credit expired in 2026.`,
     path: `/solar-incentives/${state}`,
   });
 }
@@ -52,8 +52,8 @@ export default async function IncentivesPage({ params }: { params: Promise<{ sta
   const faqSchema = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: [
-      { '@type': 'Question', name: `What solar incentives are available in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} offers: ${s.state_incentive_description}. All homeowners also qualify for the 30% federal Investment Tax Credit (ITC), which has no dollar cap and is available through 2032.` } },
-      { '@type': 'Question', name: `How much is the federal solar tax credit in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The federal ITC lets you deduct 30% of your total solar installation cost from your federal taxes. For a typical ${s.name} system costing $${sample.gross_system_cost.toLocaleString()}, that's a $${sample.federal_incentive.toLocaleString()} credit.` } },
+      { '@type': 'Question', name: `What solar incentives are available in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} offers: ${s.state_incentive_description}. The 30% federal Investment Tax Credit (ITC) expired December 31, 2025 for purchased systems, but still applies to solar leases and PPAs through 2027.` } },
+      { '@type': 'Question', name: `Is there still a federal solar tax credit in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `Not for purchased systems. The 30% federal ITC (Section 25D) expired December 31, 2025, so ${s.name} homeowners buying with cash or a loan in 2026 can no longer claim it. A solar lease or power purchase agreement (PPA) can still pass through a federal credit through 2027.` } },
       { '@type': 'Question', name: `What is net metering in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} has ${s.net_metering_policy} net metering. This means solar owners are credited for excess power exported to the grid. The top utility is ${s.top_utility}.` } },
     ],
   };
@@ -69,19 +69,19 @@ export default async function IncentivesPage({ params }: { params: Promise<{ sta
       <p className="mt-3 text-lg text-gray-600">Every solar incentive available to {s.name} homeowners in 2026.</p>
 
       <div className="mt-10 space-y-6">
-        {/* Federal ITC */}
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-7">
+        {/* Federal ITC — expired for purchases as of 2026 */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-7">
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl font-extrabold text-green-700">30%</span>
-            <h2 className="text-xl font-bold text-gray-900">Federal Investment Tax Credit (ITC)</h2>
+            <span className="text-3xl">⚠️</span>
+            <h2 className="text-xl font-bold text-gray-900">Federal Tax Credit — Expired for Purchases</h2>
           </div>
-          <p className="text-gray-700">The Residential Clean Energy Credit lets you claim <strong>30% of your total solar installation cost</strong> as a credit against your federal income taxes. On a {fmt(sample.gross_system_cost)} system, that's a <strong>{fmt(sample.federal_incentive)} credit</strong>.</p>
+          <p className="text-gray-700">The 30% federal Residential Clean Energy Credit (Section 25D) <strong>expired on December 31, 2025</strong>. Homeowners who buy a system with cash or a loan in 2026 can no longer claim it — a {fmt(sample.gross_system_cost)} system that once carried a {fmt(Math.round(sample.gross_system_cost * 0.3))} credit now has none.</p>
           <ul className="mt-4 space-y-2 text-sm text-gray-600">
-            <li>✅ No dollar cap — applies to full system cost including installation</li>
-            <li>✅ Available through December 31, 2032</li>
-            <li>✅ Unused credit can carry forward to future tax years</li>
-            <li>✅ Applies to batteries added at the same time as solar</li>
+            <li>✅ Solar <strong>leases and PPAs</strong> can still capture a federal credit through 2027 — the installer claims it and lowers your monthly payment</li>
+            <li>✅ State incentives and net metering below still apply to purchased systems</li>
+            <li>✕ No federal credit for cash or financed purchases placed in service after Dec 31, 2025</li>
           </ul>
+          <a href={`https://www.energysage.com/?utm_source=solarmetrics&utm_medium=incentives&utm_campaign=lease&utm_content=${state}`} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Compare lease &amp; PPA quotes →</a>
         </div>
 
         {/* State incentive */}

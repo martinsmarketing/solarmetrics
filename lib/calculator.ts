@@ -20,7 +20,9 @@ function compute(
 
   const annualProduction = systemKw * sunHours * 365 * 0.80;
   const grossCost = systemKw * costPerWatt * 1000;
-  const federalIncentive = grossCost * 0.30;
+  // The 30% federal residential credit (IRS §25D) expired Dec 31, 2025 for
+  // purchased systems, so cash/loan buyers in 2026+ no longer deduct it.
+  const federalIncentive = 0;
   const netCost = grossCost - federalIncentive - stateIncentive;
   const annualSavings = annualProduction * rate;
   const monthlySavings = annualSavings / 12;
@@ -95,7 +97,7 @@ export async function getSavingsTimeline(input: {
   const kw = Math.min(20, Math.max(3, (input.monthly_bill / rate) / (sunHours * 30)));
   const annualProd = kw * sunHours * 365 * 0.80;
   const gross = kw * costPerWatt * 1000;
-  const netCost = gross - gross * 0.30 - stateIncentive;
+  const netCost = gross - stateIncentive; // federal §25D credit expired Dec 31, 2025
 
   let cumulative = -netCost;
   let r = rate;

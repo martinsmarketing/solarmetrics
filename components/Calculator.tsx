@@ -24,7 +24,7 @@ function calcResult(bill: number, stateSlug: string): CalcResult {
   kw = Math.min(20, Math.max(3, kw));
   const annualProd = kw * s.sun * 365 * 0.80;
   const gross = kw * s.cpw * 1000;
-  const fed = gross * 0.30;
+  const fed = 0; // 30% federal credit expired Dec 31, 2025 for purchased systems
   const net = gross - fed - s.incentive;
   const annSav = annualProd * s.rate;
   const monthlySav = annSav / 12;
@@ -129,7 +129,6 @@ export default function Calculator({
             <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-gray-600">System Size</span><span className="font-semibold">{result.system_size_kw} kW</span></div>
               <div className="flex justify-between"><span className="text-gray-600">Gross System Cost</span><span className="font-semibold">{fmt(result.gross_system_cost)}</span></div>
-              <div className="flex justify-between text-green-700"><span>Federal Tax Credit (30%)</span><span className="font-semibold">-{fmt(result.federal_incentive)}</span></div>
               {result.state_incentive > 0 && (
                 <div className="flex justify-between text-green-700"><span>State Incentive</span><span className="font-semibold">-{fmt(result.state_incentive)}</span></div>
               )}

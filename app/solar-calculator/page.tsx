@@ -32,8 +32,8 @@ export default function SolarCalculatorPage() {
             <p className="text-gray-600 text-sm">Key factors: your local electricity rate, peak sun hours, system size, installer pricing, and available incentives. States with high rates + good sun have the shortest payback periods.</p>
           </div>
           <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="font-bold text-gray-900 mb-3">🏛️ Federal Tax Credit</h3>
-            <p className="text-gray-600 text-sm">The 30% Residential Clean Energy Credit lets you deduct 30% of your total installation cost from your federal tax bill. A $20,000 system earns a $6,000 credit — guaranteed through 2032.</p>
+            <h3 className="font-bold text-gray-900 mb-3">🏛️ Federal Tax Credit (Expired for Purchases)</h3>
+            <p className="text-gray-600 text-sm">The 30% federal Residential Clean Energy Credit ended December 31, 2025. Cash and loan buyers in 2026 can no longer claim it. Solar leases and PPAs still pass through a federal credit through 2027 — the installer claims it and lowers your payments.</p>
           </div>
           <div className="bg-gray-50 rounded-xl p-6">
             <h3 className="font-bold text-gray-900 mb-3">🔋 Net Metering</h3>

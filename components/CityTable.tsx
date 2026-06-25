@@ -18,7 +18,7 @@ function cityStats(city: City, cpw: number, incentive: number) {
   const kw = Math.min(20, Math.max(3, (150 / city.avg_electricity_rate) / (city.avg_sun_hours * 30)));
   const annualProd = kw * city.avg_sun_hours * 365 * 0.80;
   const gross = kw * cpw * 1000;
-  const net = gross - gross * 0.30 - incentive;
+  const net = gross - incentive; // federal §25D credit expired Dec 31, 2025
   const annSav = annualProd * city.avg_electricity_rate;
   // 0 is the sentinel for "incentives cover the system" (immediate payback);
   // never produce a negative figure. Capped at 30 years.

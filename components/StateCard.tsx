@@ -13,12 +13,13 @@ interface StateCardProps {
 const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 export default function StateCard({ slug, name, avg_sun_hours, avg_electricity_rate, avg_cost_per_watt, state_incentive_value, net_metering_policy }: StateCardProps) {
-  // Quick estimate: 8kW system, state data
+  // Quick estimate: 8kW system, state data. Federal §25D credit expired
+  // Dec 31, 2025, so net cost no longer deducts it for purchases.
   const annualProd = 8 * avg_sun_hours * 365 * 0.80;
   const gross = 8 * avg_cost_per_watt * 1000;
-  const net = gross - gross * 0.30 - state_incentive_value;
+  const net = gross - state_incentive_value;
   const annSav = annualProd * avg_electricity_rate;
-  const payback = Math.round((net / annSav) * 10) / 10;
+  const payback = (net <= 0 || annSav <= 0) ? 0 : Math.min(30, Math.round((net / annSav) * 10) / 10);
   const annSavFmt = fmt(annSav);
 
   return (
@@ -34,7 +35,7 @@ export default function StateCard({ slug, name, avg_sun_hours, avg_electricity_r
         </div>
         <div className="flex justify-between">
           <span>Payback period</span>
-          <span className="font-semibold">{payback} yrs</span>
+          <span className="font-semibold">{payback === 0 ? 'Immediate' : `${payback} yrs`}</span>
         </div>
         <div className="flex justify-between">
           <span>Net metering</span>

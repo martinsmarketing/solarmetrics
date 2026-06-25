@@ -99,7 +99,7 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
   const faqSchema = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: [
-      { '@type': 'Question', name: `How much does solar cost in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `Solar in ${cityRow.name}, ${stateRow.name} costs approximately ${fmt(savings.gross_system_cost)} for a ${savings.system_size_kw} kW system. After the 30% federal tax credit, your net cost is about ${fmt(savings.net_cost)}.` } },
+      { '@type': 'Question', name: `How much does solar cost in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `Solar in ${cityRow.name}, ${stateRow.name} costs approximately ${fmt(savings.gross_system_cost)} for a ${savings.system_size_kw} kW system${savings.state_incentive > 0 ? `, or about ${fmt(savings.net_cost)} after state incentives` : ''}. The 30% federal tax credit expired December 31, 2025 for purchased systems, though solar leases and PPAs can still pass it through.` } },
       { '@type': 'Question', name: `What is the solar payback period in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The estimated payback period for solar in ${cityRow.name} is ${savings.payback_period_years} years, based on a $150/month electric bill and local sun hours of ${cityRow.avg_sun_hours} hrs/day.` } },
       { '@type': 'Question', name: `Is solar worth it in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `For most ${cityRow.name} homeowners, yes. With ${cityRow.avg_sun_hours} peak sun hours per day and an electricity rate of $${cityRow.avg_electricity_rate.toFixed(3)}/kWh, a typical system saves ${fmt(savings.annual_savings)} per year and around ${fmt(savings.year_25_savings)} over 25 years after paying for itself in ${savings.payback_period_years} years.` } },
       { '@type': 'Question', name: `How many solar panels do I need in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `A typical ${cityRow.name} home needs about ${panelCount} solar panels (a ${savings.system_size_kw} kW system) to offset a $150/month electric bill, producing roughly ${savings.annual_production_kwh.toLocaleString()} kWh per year at ${cityRow.avg_sun_hours} sun hours/day.` } },
@@ -150,11 +150,13 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
             </p>
             <p>
               At those numbers, a {cityRow.name} homeowner saves about <strong>{fmt(savings.monthly_savings)}/month</strong>{' '}
-              ({fmt(savings.annual_savings)}/year). After the 30% federal tax credit brings the {fmt(savings.gross_system_cost)}{' '}
-              sticker price down to a net <strong>{fmt(savings.net_cost)}</strong>, the system pays for itself in{' '}
-              <strong>{savings.payback_period_years} years</strong> and goes on to produce free power for two decades beyond
-              that — an estimated {fmt(savings.year_25_savings)} in lifetime savings. The local grid is served by{' '}
-              {cityRow.utility_name}, whose net metering policy directly affects how much credit you earn for surplus power.
+              ({fmt(savings.annual_savings)}/year). Against a {fmt(savings.gross_system_cost)} system cost
+              {savings.state_incentive > 0 ? <> (about <strong>{fmt(savings.net_cost)}</strong> after {stateRow.name} state incentives)</> : ''},
+              that works out to a payback of about <strong>{savings.payback_period_years === null ? 'immediate' : `${savings.payback_period_years} years`}</strong>,
+              after which the system produces essentially free power for two decades — an estimated {fmt(savings.year_25_savings)} in
+              lifetime savings. Note: the 30% federal tax credit expired at the end of 2025 for purchased systems, though a solar
+              lease or PPA can still pass it through. The local grid is served by {cityRow.utility_name}, whose net metering policy
+              directly affects how much credit you earn for surplus power.
             </p>
           </div>
 
@@ -167,7 +169,6 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
                 ['System Size', `${savings.system_size_kw} kW`],
                 ['Annual Production', `${savings.annual_production_kwh.toLocaleString()} kWh`],
                 ['Gross System Cost', fmt(savings.gross_system_cost)],
-                ['Federal Tax Credit (30%)', `-${fmt(savings.federal_incentive)}`],
                 ['State Incentive', savings.state_incentive > 0 ? `-${fmt(savings.state_incentive)}` : 'None'],
                 ['Net Cost', fmt(savings.net_cost)],
                 ['Monthly Savings', fmt(savings.monthly_savings)],
@@ -204,10 +205,10 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
           <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Available Incentives</h2>
             <div className="space-y-3 text-sm">
-              <div className="flex gap-3"><span className="text-green-600 font-bold">30%</span><div><strong>Federal ITC</strong> — Deduct 30% of your system cost from federal taxes. Available through 2032.</div></div>
               {stateRow.state_incentive_value > 0 && (
                 <div className="flex gap-3"><span className="text-blue-600 font-bold">{fmt(stateRow.state_incentive_value)}</span><div><strong>{stateRow.name} State Incentive</strong> — {stateRow.state_incentive_description}</div></div>
               )}
+              <div className="flex gap-3"><span className="text-gray-400 font-bold">✕</span><div><strong>Federal Tax Credit</strong> — The 30% federal credit expired Dec 31, 2025 for purchased systems. A solar lease or PPA can still pass it through 2027.</div></div>
             </div>
             <a href={`/solar-incentives/${state}`} className="mt-4 inline-block text-blue-600 text-sm hover:underline">View all {stateRow.name} incentives →</a>
           </div>

@@ -12,8 +12,8 @@ const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: [
-    { '@type': 'Question', name: 'How much does solar cost in 2026?', acceptedAnswer: { '@type': 'Answer', text: 'The average solar installation costs between $15,000 and $30,000 before incentives. After the 30% federal tax credit, most homeowners pay $10,000–$21,000. Costs vary by state, system size, and installer.' } },
-    { '@type': 'Question', name: 'What is the federal solar tax credit?', acceptedAnswer: { '@type': 'Answer', text: 'The Residential Clean Energy Credit lets you deduct 30% of your solar installation cost from your federal taxes. On a $20,000 system, that\'s a $6,000 tax credit. It applies through 2032.' } },
+    { '@type': 'Question', name: 'How much does solar cost in 2026?', acceptedAnswer: { '@type': 'Answer', text: 'A typical home solar installation costs between $15,000 and $30,000 to purchase in 2026. The 30% federal tax credit expired December 31, 2025, so cash and loan buyers no longer deduct it — though state incentives and net metering still reduce your effective cost, and solar leases or PPAs can pass through federal credit savings.' } },
+    { '@type': 'Question', name: 'Is there still a federal solar tax credit in 2026?', acceptedAnswer: { '@type': 'Answer', text: 'Not for purchased systems. The 30% federal Residential Clean Energy Credit (Section 25D) expired on December 31, 2025, so homeowners who buy with cash or a loan in 2026 can no longer claim it. Solar leases and power purchase agreements (PPAs) still qualify through 2027 — the installer claims the credit and passes the savings to you as lower payments.' } },
     { '@type': 'Question', name: 'How long does it take for solar to pay for itself?', acceptedAnswer: { '@type': 'Answer', text: 'The average solar payback period in the US is 7–12 years. Sunny states with high electricity rates like Hawaii, Massachusetts, and California often see payback in 5–8 years.' } },
     { '@type': 'Question', name: 'What is net metering and why does it matter?', acceptedAnswer: { '@type': 'Answer', text: 'Net metering lets you sell excess solar power back to the grid, receiving credits on your bill. Full retail net metering gives you the most value. Some states offer avoided-cost rates instead, which are lower.' } },
     { '@type': 'Question', name: 'How big of a solar system do I need?', acceptedAnswer: { '@type': 'Answer', text: 'Divide your monthly kWh usage by your peak sun hours × 30 days to get the system size in kW. Most homes use 8–12 kW systems. Our calculator estimates this automatically from your electric bill.' } },
@@ -48,7 +48,7 @@ export default async function HomePage() {
             <div className="mt-8 flex flex-wrap gap-6 text-sm text-gray-500">
               <span className="flex items-center gap-1.5">✅ 500+ licensed installers</span>
               <span className="flex items-center gap-1.5">✅ Avg. $1,400/yr savings</span>
-              <span className="flex items-center gap-1.5">✅ 30% federal tax credit</span>
+              <span className="flex items-center gap-1.5">✅ Lease & PPA options</span>
             </div>
           </div>
           <div>

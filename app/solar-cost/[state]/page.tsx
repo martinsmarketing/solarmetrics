@@ -52,8 +52,8 @@ export default async function StatePage({ params }: { params: Promise<{ state: s
   const faq = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: [
-      { '@type': 'Question', name: `How much does solar cost in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The average solar installation in ${s.name} costs about ${fmt(sample.gross_system_cost)} for a ${sample.system_size_kw} kW system. After the 30% federal tax credit, your net cost is approximately ${fmt(sample.net_cost)}.` } },
-      { '@type': 'Question', name: `What solar incentives are available in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} offers: ${s.state_incentive_description}. Plus the 30% federal Investment Tax Credit applies to all installations.` } },
+      { '@type': 'Question', name: `How much does solar cost in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The average solar installation in ${s.name} costs about ${fmt(sample.gross_system_cost)} for a ${sample.system_size_kw} kW system${sample.state_incentive > 0 ? `, or about ${fmt(sample.net_cost)} after state incentives` : ''}. Note: the 30% federal tax credit expired December 31, 2025 for purchased systems.` } },
+      { '@type': 'Question', name: `What solar incentives are available in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} offers: ${s.state_incentive_description}. The 30% federal tax credit expired at the end of 2025 for purchases, but solar leases and PPAs can still pass through a federal credit through 2027.` } },
       { '@type': 'Question', name: `How long is the solar payback period in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `For a typical home with a $150/month electric bill, the payback period in ${s.name} is approximately ${sample.payback_period_years} years. Over 25 years, you could save ${fmt(sample.year_25_savings)}.` } },
     ],
   };
@@ -94,7 +94,6 @@ export default async function StatePage({ params }: { params: Promise<{ state: s
               {[
                 { label: 'System Size', val: `${sample.system_size_kw} kW` },
                 { label: 'Gross Cost', val: fmt(sample.gross_system_cost) },
-                { label: 'Federal Credit', val: `-${fmt(sample.federal_incentive)}` },
                 { label: 'State Incentive', val: sample.state_incentive > 0 ? `-${fmt(sample.state_incentive)}` : 'None' },
                 { label: 'Net Cost', val: fmt(sample.net_cost) },
                 { label: 'Annual Savings', val: fmt(sample.annual_savings) },
@@ -116,10 +115,10 @@ export default async function StatePage({ params }: { params: Promise<{ state: s
             <div className="space-y-4">
               <div className="bg-white border border-gray-200 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-green-600 font-bold text-lg">30%</span>
-                  <h3 className="font-semibold text-gray-900">Federal Investment Tax Credit (ITC)</h3>
+                  <span className="text-gray-400 font-bold text-lg">✕</span>
+                  <h3 className="font-semibold text-gray-900">Federal Tax Credit (Expired Dec 31, 2025)</h3>
                 </div>
-                <p className="text-gray-600 text-sm">Deduct 30% of your total solar installation cost from your federal taxes. Available through 2032 with no dollar cap.</p>
+                <p className="text-gray-600 text-sm">The 30% federal Residential Clean Energy Credit ended for purchased systems on December 31, 2025. Homeowners buying with cash or a loan in 2026 can no longer claim it. A solar lease or PPA can still pass through a federal credit through 2027 — the installer claims it and lowers your payments.</p>
               </div>
               {s.state_incentive_value > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl p-5">

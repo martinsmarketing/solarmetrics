@@ -10,7 +10,7 @@ function buildTimeline(bill: number, stateSlug: string) {
   const kw = Math.min(20, Math.max(3, (bill / s.rate) / (s.sun * 30)));
   const annualProd = kw * s.sun * 365 * 0.80;
   const gross = kw * s.cpw * 1000;
-  const netCost = gross - gross * 0.30 - s.incentive;
+  const netCost = gross - s.incentive; // federal §25D credit expired Dec 31, 2025
   let cumulative = -netCost;
   let r = s.rate;
   return Array.from({ length: 25 }, (_, i) => {
