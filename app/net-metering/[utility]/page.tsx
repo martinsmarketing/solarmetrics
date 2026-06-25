@@ -88,7 +88,7 @@ export default async function NetMeteringPage({ params }: { params: Promise<{ ut
               ['System Size', `${sample.system_size_kw} kW`],
               ['Annual Production', `${sample.annual_production_kwh.toLocaleString()} kWh`],
               ['Annual Savings', fmt(sample.annual_savings)],
-              ['Payback Period', `${sample.payback_period_years} yrs`],
+              ['Payback Period', sample.payback_period_years === null ? 'Immediate' : `${sample.payback_period_years} yrs`],
             ].map(([label, val]) => (
               <div key={label} className="bg-gray-50 rounded-lg p-3">
                 <div className="text-gray-500 text-xs">{label}</div>

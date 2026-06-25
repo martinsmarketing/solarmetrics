@@ -20,8 +20,11 @@ function cityStats(city: City, cpw: number, incentive: number) {
   const gross = kw * cpw * 1000;
   const net = gross - gross * 0.30 - incentive;
   const annSav = annualProd * city.avg_electricity_rate;
+  // 0 is the sentinel for "incentives cover the system" (immediate payback);
+  // never produce a negative figure. Capped at 30 years.
+  const payback = (net <= 0 || annSav <= 0) ? 0 : Math.min(30, net / annSav);
   return {
-    payback: Math.round((net / annSav) * 10) / 10,
+    payback: Math.round(payback * 10) / 10,
     annualSavings: Math.round(annSav),
   };
 }
@@ -73,7 +76,7 @@ export default function CityTable({ cities, cpw, incentive }: { cities: City[]; 
                 </Link>
               </td>
               <td className="px-4 py-3 text-green-700 font-semibold">{fmt(city.annualSavings)}</td>
-              <td className="px-4 py-3 font-medium">{city.payback}</td>
+              <td className="px-4 py-3 font-medium">{city.payback === 0 ? 'Immediate' : city.payback}</td>
               <td className="px-4 py-3 text-gray-600">{city.population.toLocaleString()}</td>
               <td className="px-4 py-3 text-gray-600 text-sm">{city.utility_name}</td>
             </tr>

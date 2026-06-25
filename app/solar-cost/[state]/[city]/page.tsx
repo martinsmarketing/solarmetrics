@@ -123,7 +123,7 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: 'Annual Savings', value: fmt(savings.annual_savings) },
-              { label: 'Payback Period', value: `${savings.payback_period_years} yrs` },
+              { label: 'Payback Period', value: savings.payback_period_years === null ? 'Immediate' : `${savings.payback_period_years} yrs` },
               { label: 'Net Cost', value: fmt(savings.net_cost) },
               { label: '25-Year Savings', value: fmt(savings.year_25_savings) },
             ].map(stat => (

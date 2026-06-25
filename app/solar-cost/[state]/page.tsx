@@ -98,7 +98,7 @@ export default async function StatePage({ params }: { params: Promise<{ state: s
                 { label: 'State Incentive', val: sample.state_incentive > 0 ? `-${fmt(sample.state_incentive)}` : 'None' },
                 { label: 'Net Cost', val: fmt(sample.net_cost) },
                 { label: 'Annual Savings', val: fmt(sample.annual_savings) },
-                { label: 'Payback Period', val: `${sample.payback_period_years} yrs` },
+                { label: 'Payback Period', val: sample.payback_period_years === null ? 'Immediate' : `${sample.payback_period_years} yrs` },
                 { label: '25-Year Savings', val: fmt(sample.year_25_savings) },
                 { label: 'CO₂ Offset/yr', val: `${sample.co2_offset_lbs.toLocaleString()} lbs` },
               ].map(item => (
