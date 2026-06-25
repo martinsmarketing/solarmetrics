@@ -46,7 +46,8 @@ export const STATE_DATA: Record<string, StateEstimate> = {
   'iowa': { rate: 0.115, sun: 4.6, cpw: 3.00, incentive: 5000 },
   'kansas': { rate: 0.118, sun: 5.0, cpw: 2.90, incentive: 500 },
   'kentucky': { rate: 0.112, sun: 4.6, cpw: 2.80, incentive: 0 },
-  'louisiana': { rate: 0.090, sun: 5.0, cpw: 2.75, incentive: 12500 },
+  // LA's 50% state solar credit expired; no current state credit.
+  'louisiana': { rate: 0.090, sun: 5.0, cpw: 2.75, incentive: 0 },
   'maine': { rate: 0.198, sun: 4.2, cpw: 3.40, incentive: 2000 },
   'maryland': { rate: 0.148, sun: 4.5, cpw: 3.10, incentive: 1000 },
   'massachusetts': { rate: 0.248, sun: 4.2, cpw: 3.50, incentive: 1000 },

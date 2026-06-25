@@ -77,7 +77,7 @@ const states = [
   { slug:'iowa', name:'Iowa', cpw:3.00, desc:'Iowa offers a 15% state tax credit up to $5,000.', val:5000, nm:'Full Retail', sun:4.6, rate:0.115, util:'MidAmerican Energy' },
   { slug:'kansas', name:'Kansas', cpw:2.90, desc:'Kansas offers a property tax exemption for solar installations.', val:500, nm:'Full Retail', sun:5.0, rate:0.118, util:'Evergy' },
   { slug:'kentucky', name:'Kentucky', cpw:2.80, desc:'Kentucky has no statewide solar incentive program.', val:0, nm:'Full Retail', sun:4.6, rate:0.112, util:'LG&E and KU Energy' },
-  { slug:'louisiana', name:'Louisiana', cpw:2.75, desc:'Louisiana offers a 50% state tax credit up to $12,500.', val:12500, nm:'Full Retail', sun:5.0, rate:0.090, util:'Entergy Louisiana' },
+  { slug:'louisiana', name:'Louisiana', cpw:2.75, desc:'Louisiana\'s state solar tax credit has expired, so there is no state credit. Homeowners still benefit from a solar property tax exemption (panels don\'t raise your property tax bill).', val:0, nm:'Avoided Cost', sun:5.0, rate:0.090, util:'Entergy Louisiana' },
   { slug:'maine', name:'Maine', cpw:3.40, desc:'Maine offers a solar rebate program up to $2,000.', val:2000, nm:'Full Retail', sun:4.2, rate:0.198, util:'Central Maine Power' },
   { slug:'maryland', name:'Maryland', cpw:3.10, desc:'Maryland offers a $1,000 state grant for residential solar.', val:1000, nm:'Full Retail', sun:4.5, rate:0.148, util:'BGE' },
   { slug:'massachusetts', name:'Massachusetts', cpw:3.50, desc:'Massachusetts offers a 15% state tax credit up to $1,000 plus SMART program.', val:1000, nm:'Full Retail', sun:4.2, rate:0.248, util:'Eversource MA' },
