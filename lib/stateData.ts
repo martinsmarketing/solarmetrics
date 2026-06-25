@@ -43,7 +43,8 @@ export const STATE_DATA: Record<string, StateEstimate> = {
   'idaho': { rate: 0.102, sun: 5.0, cpw: 2.90, incentive: 2000 },
   'illinois': { rate: 0.148, sun: 4.5, cpw: 3.10, incentive: 10000 },
   'indiana': { rate: 0.138, sun: 4.5, cpw: 2.85, incentive: 1000 },
-  'iowa': { rate: 0.115, sun: 4.6, cpw: 3.00, incentive: 5000 },
+  // Iowa's 15% residential solar credit ended in 2021.
+  'iowa': { rate: 0.115, sun: 4.6, cpw: 3.00, incentive: 0 },
   'kansas': { rate: 0.118, sun: 5.0, cpw: 2.90, incentive: 500 },
   'kentucky': { rate: 0.112, sun: 4.6, cpw: 2.80, incentive: 0 },
   // LA's 50% state solar credit expired; no current state credit.
@@ -74,7 +75,8 @@ export const STATE_DATA: Record<string, StateEstimate> = {
   'south-dakota': { rate: 0.112, sun: 5.0, cpw: 2.90, incentive: 0 },
   'tennessee': { rate: 0.118, sun: 4.8, cpw: 2.85, incentive: 0 },
   'texas': { rate: 0.120, sun: 5.5, cpw: 2.75, incentive: 1000 },
-  'utah': { rate: 0.108, sun: 6.0, cpw: 2.85, incentive: 1600 },
+  // Utah's solar tax credit was fully phased out for installs after Dec 31, 2023.
+  'utah': { rate: 0.108, sun: 6.0, cpw: 2.85, incentive: 0 },
   'vermont': { rate: 0.198, sun: 4.0, cpw: 3.40, incentive: 1000 },
   'virginia': { rate: 0.138, sun: 4.6, cpw: 2.95, incentive: 500 },
   'washington': { rate: 0.102, sun: 4.0, cpw: 3.10, incentive: 1000 },
