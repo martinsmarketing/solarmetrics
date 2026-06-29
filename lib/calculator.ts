@@ -1,5 +1,12 @@
 import getDb from './db';
 
+// Standard reference system for cross-location comparison pages. Sizing to a
+// fixed dollar bill makes savings identical everywhere (savings = bill), so the
+// state/city comparison displays use a fixed system size instead — then savings
+// vary by sun hours and electricity rate, as users expect. The interactive
+// calculator still sizes to the user's actual bill for a personal estimate.
+export const STANDARD_SYSTEM_KW = 8;
+
 interface StateRow {
   avg_electricity_rate: number;
   avg_sun_hours: number;
@@ -79,6 +86,7 @@ export async function calculateSolarSavings(input: {
 export async function getSavingsTimeline(input: {
   monthly_bill: number;
   state_slug: string;
+  system_size_kw?: number;
   rate_override?: number;
   sun_hours_override?: number;
 }) {
@@ -94,7 +102,7 @@ export async function getSavingsTimeline(input: {
   const costPerWatt = Number(row?.avg_cost_per_watt ?? 3.00);
   const stateIncentive = Number(row?.state_incentive_value ?? 0);
 
-  const kw = Math.min(20, Math.max(3, (input.monthly_bill / rate) / (sunHours * 30)));
+  const kw = input.system_size_kw ?? Math.min(20, Math.max(3, (input.monthly_bill / rate) / (sunHours * 30)));
   const annualProd = kw * sunHours * 365 * 0.80;
   const gross = kw * costPerWatt * 1000;
   const netCost = gross - stateIncentive; // federal §25D credit expired Dec 31, 2025

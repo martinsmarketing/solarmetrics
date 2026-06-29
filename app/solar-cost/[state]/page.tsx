@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import getDb from '@/lib/db';
 import { generatePageMeta } from '@/lib/metadata';
-import { calculateSolarSavings } from '@/lib/calculator';
+import { calculateSolarSavings, STANDARD_SYSTEM_KW } from '@/lib/calculator';
 import Calculator from '@/components/Calculator';
 import CityTable from '@/components/CityTable';
 import type { Metadata } from 'next';
@@ -47,14 +47,14 @@ export default async function StatePage({ params }: { params: Promise<{ state: s
 
   const citiesRes = await db.execute({ sql: 'SELECT * FROM cities WHERE state_slug = ? ORDER BY population DESC', args: [state] });
   const cities = citiesRes.rows as unknown as City[];
-  const sample = await calculateSolarSavings({ monthly_bill: 150, state_slug: state });
+  const sample = await calculateSolarSavings({ monthly_bill: 150, system_size_kw: STANDARD_SYSTEM_KW, state_slug: state });
 
   const faq = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: [
       { '@type': 'Question', name: `How much does solar cost in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The average solar installation in ${s.name} costs about ${fmt(sample.gross_system_cost)} for a ${sample.system_size_kw} kW system${sample.state_incentive > 0 ? `, or about ${fmt(sample.net_cost)} after state incentives` : ''}. Note: the 30% federal tax credit expired December 31, 2025 for purchased systems.` } },
       { '@type': 'Question', name: `What solar incentives are available in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name} offers: ${s.state_incentive_description}. The 30% federal tax credit expired at the end of 2025 for purchases, but solar leases and PPAs can still pass through a federal credit through 2027.` } },
-      { '@type': 'Question', name: `How long is the solar payback period in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `For a typical home with a $150/month electric bill, the payback period in ${s.name} is approximately ${sample.payback_period_years} years. Over 25 years, you could save ${fmt(sample.year_25_savings)}.` } },
+      { '@type': 'Question', name: `How long is the solar payback period in ${s.name}?`, acceptedAnswer: { '@type': 'Answer', text: `For a standard ${sample.system_size_kw} kW home system, the payback period in ${s.name} is approximately ${sample.payback_period_years} years. Over 25 years, you could save ${fmt(sample.year_25_savings)}.` } },
     ],
   };
 
@@ -89,7 +89,7 @@ export default async function StatePage({ params }: { params: Promise<{ state: s
           {/* Sample savings */}
           <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Estimated Savings for a Typical {s.name} Home</h2>
-            <p className="text-sm text-gray-500 mb-4">Based on a $150/month electric bill</p>
+            <p className="text-sm text-gray-500 mb-4">Based on a standard {sample.system_size_kw} kW home system</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               {[
                 { label: 'System Size', val: `${sample.system_size_kw} kW` },

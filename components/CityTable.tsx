@@ -15,7 +15,9 @@ interface City {
 const fmt = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 function cityStats(city: City, cpw: number, incentive: number) {
-  const kw = Math.min(20, Math.max(3, (150 / city.avg_electricity_rate) / (city.avg_sun_hours * 30)));
+  // Standard 8 kW reference system so savings vary by sun & rate across cities
+  // (sizing to a fixed bill would make every city's savings identical).
+  const kw = 8;
   const annualProd = kw * city.avg_sun_hours * 365 * 0.80;
   const gross = kw * cpw * 1000;
   const net = gross - incentive; // federal §25D credit expired Dec 31, 2025

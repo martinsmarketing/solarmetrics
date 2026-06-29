@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import MetricsNetwork from '@/components/MetricsNetwork';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -81,13 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <li><Link href="/#states" className="hover:text-white transition-colors">State Solar Costs</Link></li>
                 </ul>
               </div>
-              <div>
-                <h4 className="text-white font-semibold mb-3">Resources</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/#faq" className="hover:text-white transition-colors">Solar FAQ</Link></li>
-                  <li><a href="https://www.energysage.com/?utm_source=solarmetrics&utm_medium=footer" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Get Installer Quotes</a></li>
-                </ul>
-              </div>
+              <MetricsNetwork current="solar" />
               <div>
                 <h4 className="text-white font-semibold mb-3">Disclaimer</h4>
                 <p className="text-xs">Data is for informational purposes only. Actual costs and savings vary by system, installer, and local conditions. Always get multiple quotes.</p>

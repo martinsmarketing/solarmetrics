@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import getDb from '@/lib/db';
 import { generatePageMeta } from '@/lib/metadata';
-import { calculateSolarSavings, getSavingsTimeline } from '@/lib/calculator';
+import { calculateSolarSavings, getSavingsTimeline, STANDARD_SYSTEM_KW } from '@/lib/calculator';
 import { distanceMiles } from '@/lib/geo';
 import LeadForm from '@/components/LeadForm';
 import SavingsChart from '@/components/SavingsChart';
@@ -76,12 +76,14 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
   const [savings, timeline] = await Promise.all([
     calculateSolarSavings({
       monthly_bill: 150,
+      system_size_kw: STANDARD_SYSTEM_KW,
       state_slug: state,
       rate_override: cityRow.avg_electricity_rate,
       sun_hours_override: cityRow.avg_sun_hours,
     }),
     getSavingsTimeline({
       monthly_bill: 150,
+      system_size_kw: STANDARD_SYSTEM_KW,
       state_slug: state,
       rate_override: cityRow.avg_electricity_rate,
       sun_hours_override: cityRow.avg_sun_hours,
@@ -100,9 +102,9 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: [
       { '@type': 'Question', name: `How much does solar cost in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `Solar in ${cityRow.name}, ${stateRow.name} costs approximately ${fmt(savings.gross_system_cost)} for a ${savings.system_size_kw} kW system${savings.state_incentive > 0 ? `, or about ${fmt(savings.net_cost)} after state incentives` : ''}. The 30% federal tax credit expired December 31, 2025 for purchased systems, though solar leases and PPAs can still pass it through.` } },
-      { '@type': 'Question', name: `What is the solar payback period in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The estimated payback period for solar in ${cityRow.name} is ${savings.payback_period_years} years, based on a $150/month electric bill and local sun hours of ${cityRow.avg_sun_hours} hrs/day.` } },
+      { '@type': 'Question', name: `What is the solar payback period in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `The estimated payback period for solar in ${cityRow.name} is ${savings.payback_period_years} years for a standard ${savings.system_size_kw} kW system, based on local sun hours of ${cityRow.avg_sun_hours} hrs/day and a rate of $${cityRow.avg_electricity_rate.toFixed(3)}/kWh.` } },
       { '@type': 'Question', name: `Is solar worth it in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `For most ${cityRow.name} homeowners, yes. With ${cityRow.avg_sun_hours} peak sun hours per day and an electricity rate of $${cityRow.avg_electricity_rate.toFixed(3)}/kWh, a typical system saves ${fmt(savings.annual_savings)} per year and around ${fmt(savings.year_25_savings)} over 25 years after paying for itself in ${savings.payback_period_years} years.` } },
-      { '@type': 'Question', name: `How many solar panels do I need in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `A typical ${cityRow.name} home needs about ${panelCount} solar panels (a ${savings.system_size_kw} kW system) to offset a $150/month electric bill, producing roughly ${savings.annual_production_kwh.toLocaleString()} kWh per year at ${cityRow.avg_sun_hours} sun hours/day.` } },
+      { '@type': 'Question', name: `How many solar panels do I need in ${cityRow.name}?`, acceptedAnswer: { '@type': 'Answer', text: `A standard ${savings.system_size_kw} kW home solar system is about ${panelCount} panels, producing roughly ${savings.annual_production_kwh.toLocaleString()} kWh per year in ${cityRow.name} at ${cityRow.avg_sun_hours} sun hours/day. Your exact size depends on your household's electricity use.` } },
       { '@type': 'Question', name: `Does ${cityRow.utility_name} offer net metering?`, acceptedAnswer: { '@type': 'Answer', text: `${cityRow.utility_name} offers ${utility?.net_metering_policy ?? stateRow.net_metering_policy} net metering. ${utility?.net_metering_compensation ?? 'Check with your utility for current compensation rates.'}.` } },
     ],
   };
@@ -143,10 +145,10 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
             <h2 className="text-xl font-bold text-gray-900 mb-4">Solar in {cityRow.name}: What Homeowners Should Know</h2>
             <p>
               {cityRow.name} sees an average of <strong>{cityRow.avg_sun_hours} peak sun hours per day</strong>, which is what
-              ultimately determines how much electricity a rooftop system produces here. Paired with {stateRow.name}&apos;s
-              local electricity rate of <strong>${cityRow.avg_electricity_rate.toFixed(3)}/kWh</strong>, a typical home
-              offsetting a $150/month bill would install a <strong>{savings.system_size_kw} kW system</strong> (about{' '}
-              {panelCount} panels) generating roughly {savings.annual_production_kwh.toLocaleString()} kWh each year.
+              ultimately determines how much electricity a rooftop system produces here. A standard{' '}
+              <strong>{savings.system_size_kw} kW system</strong> (about {panelCount} panels) generates roughly{' '}
+              {savings.annual_production_kwh.toLocaleString()} kWh each year in {cityRow.name} — and paired with {stateRow.name}&apos;s
+              local electricity rate of <strong>${cityRow.avg_electricity_rate.toFixed(3)}/kWh</strong>, that&apos;s where the savings come from.
             </p>
             <p>
               At those numbers, a {cityRow.name} homeowner saves about <strong>{fmt(savings.monthly_savings)}/month</strong>{' '}
@@ -163,7 +165,7 @@ export default async function CityPage({ params }: { params: Promise<{ state: st
           {/* Savings breakdown */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Cost & Savings Breakdown</h2>
-            <p className="text-sm text-gray-500 mb-4">Based on $150/month electric bill in {cityRow.name}</p>
+            <p className="text-sm text-gray-500 mb-4">Based on a standard {savings.system_size_kw} kW system in {cityRow.name}</p>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {[
                 ['System Size', `${savings.system_size_kw} kW`],
