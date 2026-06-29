@@ -7,7 +7,7 @@ type Site = { key: string; name: string; url: string; blurb: string; live: boole
 
 export const NETWORK_SITES: Site[] = [
   { key: 'solar', name: 'SolarMetrics', url: 'https://www.getsolarmetrics.com', blurb: 'Solar panel cost & savings by state', live: true },
-  { key: 'heatpump', name: 'HeatPumpMetrics', url: 'https://heatpumpmetrics.vercel.app', blurb: 'Heat pump cost & savings by state', live: true },
+  { key: 'heatpump', name: 'HeatPumpMetrics', url: 'https://www.getheatpumpmetrics.com', blurb: 'Heat pump cost & savings by state', live: true },
   { key: 'battery', name: 'BatteryMetrics', url: 'https://www.getbatterymetrics.com', blurb: 'Home battery storage cost & payback', live: false },
 ];
 
