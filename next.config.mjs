@@ -9,7 +9,7 @@ const nextConfig = {
     return [
       {
         source: '/:path*',
-        destination: 'https://electrifymetrics.vercel.app/:path*',
+        destination: 'https://www.getsolarmetrics.com/:path*',
         permanent: true,
       },
     ];
